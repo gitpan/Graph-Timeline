@@ -10,7 +10,7 @@ use GD::Text::Wrap;
 
 use base 'Graph::Timeline';
 
-our $VERSION = '1.1';
+our $VERSION = '1.2';
 
 sub render {
     die "Timeline::GD->render() expected HASH as parameter" unless scalar(@_) % 2 == 1;
@@ -365,7 +365,7 @@ Graph::Timeline::GD - Render timeline data with GD
 
 =head1 VERSION
 
-This document refers to verion 1.1 of Graph::Timeline::GD, released January 26, 2004
+This document refers to verion 1.2 of Graph::Timeline::GD, released July 15, 2005
 
 =head1 SYNOPSIS
 
@@ -463,6 +463,8 @@ end_end will be 1980/12/31. Width_post will contain the number of pixels that re
 =item start, start_start, start_end, width_pre
 
 The same subinterval messing about for the start date as for the end date (defined above).
+
+=back
 
 =item render_point( RECORD )
 

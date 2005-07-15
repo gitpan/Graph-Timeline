@@ -1,6 +1,6 @@
 Graph::Timeline - Manipulate and display timelines
 
-This is release V1.1 of Graph::Timeline. The class 
+This is release V1.2 of Graph::Timeline. The class 
 is used to show timelines.
 
 Look in the examples directory for a program showing how to use the
@@ -52,3 +52,6 @@ V1.0:
 V1.1:
       - Handles the years in the window correctly
 	  - Draws points
+
+V1.2:
+      - Minor fix to the POD

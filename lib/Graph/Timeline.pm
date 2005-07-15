@@ -7,7 +7,7 @@ use warnings;
 
 use Date::Calc;
 
-our $VERSION = '1.1';
+our $VERSION = '1.2';
 
 sub new {
     my ($class) = @_;
@@ -292,7 +292,7 @@ Graph::Timeline - Render timeline data
 
 =head1 VERSION
 
-This document refers to verion 1.1 of Graph::Timeline, released January 26, 2004
+This document refers to verion 1.2 of Graph::Timeline, released July 15, 2005
 
 =head1 SYNOPSIS
 
