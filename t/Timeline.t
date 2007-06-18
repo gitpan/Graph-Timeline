@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 103;
+use Test::More tests => 108;
 
 use_ok('Graph::Timeline');
 
@@ -46,10 +46,10 @@ like( $@, qr/^Timeline->add_interval\(\) invalid date for 'start'/, 'Missing arg
 eval { $x->add_interval( label => '1', start => '1950/01/01', end => '1955/01/01' ); };
 is( $@, '', 'That one worked' );
 
-eval { $x->add_interval( label => '6', start => '1972/01/01', end => '1980/01/01' ); };
+eval { $x->add_interval( label => '6', start => '1972/01', end => '1980/01/01' ); };
 is( $@, '', 'That one worked' );
 
-eval { $x->add_interval( label => '2', start => '1950/01/01', end => '1965/01/01' ); };
+eval { $x->add_interval( label => '2', start => '1950', end => '1965/01/01' ); };
 is( $@, '', 'That one worked' );
 
 eval { $x->add_interval( label => '4', start => '1965/01/01', end => '1969/01/01' ); };
@@ -61,6 +61,12 @@ is( $@, '', 'That one worked' );
 eval { $x->add_interval( label => '3', start => '1950/01/01', end => '1972/01/01' ); };
 is( $@, '', 'That one worked' );
 
+eval { $x->add_interval( label => '7', start => '2000/01/01', end => 'present' ); };
+is( $@, '', 'That one worked' );
+
+eval { $x->add_interval( label => '3', start => '2000/01/01', end => '1900/01/01' ); };
+like( $@, qr/^Timeline->add_interval\(\) 'start' and 'end' are in the wrong order /, 'Start and end in the wrong order' );
+
 ################################################################################
 # Get the data
 ################################################################################
@@ -70,9 +76,9 @@ like( $@, qr/^Timeline->data\(\) takes no arguments /, 'Too many arguments' );
 
 my @l = $x->data();
 
-is( scalar(@l), 6, 'Correct length' );
+is( scalar(@l), 7, 'Correct length' );
 
-foreach my $y (qw/1 2 3 4 5 6/) {
+foreach my $y (qw/2 1 3 4 5 6 7/) {
     my $z = shift @l;
     is( $z->{label}, $y, 'Correct order' );
 }
@@ -158,7 +164,7 @@ $x->window( start => '1961/01/01' );
 
 @l = $x->data();
 
-is( scalar(@l), 6, 'Correct length' );
+is( scalar(@l), 7, 'Correct length' );
 
 foreach my $y ((undef, 2, 3, 4, 5, 6)) {
     my $z = shift @l;
@@ -169,7 +175,7 @@ $x->window( start => '1961/01/01', end_in => 1 );
 
 @l = $x->data();
 
-is( scalar(@l), 6, 'Correct length' );
+is( scalar(@l), 7, 'Correct length' );
 
 foreach my $y ((undef, 2, 3, 4, 5, 6)) {
     my $z = shift @l;
@@ -182,7 +188,7 @@ $x->window( end => '1971/01/01' );
 
 is( scalar(@l), 6, 'Correct length' );
 
-foreach my $y ((undef, 1, 2, 3, 4, 5)) {
+foreach my $y ((undef, 2, 1, 3, 4, 5)) {
     my $z = shift @l;
     is( $z->{label}, $y, 'Correct order' );
 }
@@ -193,7 +199,7 @@ $x->window( end => '1971/01/01', start_in => 1 );
 
 is( scalar(@l), 6, 'Correct length' );
 
-foreach my $y ((undef, 1, 2, 3, 4)) {
+foreach my $y ((undef, 2, 1, 3, 4)) {
     my $z = shift @l;
     is( $z->{label}, $y, 'Correct order' );
 }
@@ -202,7 +208,7 @@ $x->window( callback => \&filter );
 
 @l = $x->data();
 
-is( scalar(@l), 3, 'Correct length' );
+is( scalar(@l), 4, 'Correct length' );
 
 foreach my $y (qw/1 3 5/) {
     my $z = shift @l;
@@ -231,19 +237,31 @@ like( $@, qr/^Timeline->add_point\(\) invalid date for 'start'/, 'Missing argume
 eval { $x->add_point( label => '7', start => '1961/01/01' ); };
 is( $@, '', 'That one worked' );
 
+eval { $x->add_point( label => '7', start => '1961/MM/01' ); };
+like( $@, qr/^Timeline->add_point\(\) invalid date for 'start' /, 'Invalid date format' );
+
+eval { $x->add_point( label => '7', start => '1961/01/DD' ); };
+like( $@, qr/^Timeline->add_point\(\) invalid date for 'start' /, 'Invalid date format' );
+
 $x->window();
 
 @l = $x->data();
 
-is( scalar(@l), 7, 'Correct length' );
+is( scalar(@l), 8, 'Correct length' );
 
-foreach my $y (qw/1 2 3 7 4 5 6/) {
+foreach my $y (qw/2 1 3 7 4 5 6/) {
     my $z = shift @l;
     is( $z->{label}, $y, 'Correct order' );
 }
+
+################################################################################
+# A utility function
+################################################################################
 
 sub filter {
     my ($data) = @_;
 
     return ( $data->{label} % 2 ) == 1;
 }
+
+# vim: syntax=perl:

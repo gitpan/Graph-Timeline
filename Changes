@@ -1,0 +1,10 @@
+Revision history for Perl extension Graph::Timeline
+
+1.3  Sun 17th June 2006
+    - Start and end can now be input down to the second level with
+      the yyyy-mm-ddThh:mm:ss format. However GraphGD only operates
+      at the yyyy-mm-dd level. The new format was introduced for the
+      DiagonalGD chart.
+
+1.2  Wed 14th September 2005
+	- Realised I needed a change log file

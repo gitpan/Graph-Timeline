@@ -39,7 +39,7 @@ while ( my $line = <> ) {
 
 $x->window();
 
-open( FILE, '>image01.png' );
+open( FILE, '>test_timeline_01.png' );
 binmode(FILE);
 print FILE $x->render( border => 2, pixelsperyear => 100 );
 close(FILE);
@@ -50,7 +50,7 @@ close(FILE);
 
 $x->window(start=>'1950/01/01', end=>'1999/12/31');
 
-open( FILE, '>image02.png' );
+open( FILE, '>test_timeline_02.png' );
 binmode(FILE);
 print FILE $x->render( border => 2, pixelsperyear => 100 );
 close(FILE);
@@ -62,7 +62,7 @@ close(FILE);
 
 $x->window(start=>'1950/01/01', end=>'1999/12/31', start_in=>1);
 
-open( FILE, '>image03.png' );
+open( FILE, '>test_timeline_03.png' );
 binmode(FILE);
 print FILE $x->render( border => 2, pixelsperyear => 100 );
 close(FILE);
@@ -75,7 +75,7 @@ close(FILE);
 
 $x->window(start=>'1950/01/01', end=>'1999/12/31', start_in=>1, end_in=>1);
 
-open( FILE, '>image04.png' );
+open( FILE, '>test_timeline_04.png' );
 binmode(FILE);
 print FILE $x->render( border => 2, pixelsperyear => 100 );
 close(FILE);
@@ -87,7 +87,7 @@ close(FILE);
 
 $x->window(start=>'1950/01/01', end=>'1999/12/31', start_in=>1, end_in=>1, span=>1);
 
-open( FILE, '>image05.png' );
+open( FILE, '>test_timeline_05.png' );
 binmode(FILE);
 print FILE $x->render( border => 2, pixelsperyear => 100 );
 close(FILE);

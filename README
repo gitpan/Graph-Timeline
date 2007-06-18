@@ -1,10 +1,16 @@
 Graph::Timeline - Manipulate and display timelines
 
-This is release V1.2 of Graph::Timeline. The class 
+This is release V1.3 of Graph::Timeline. The class 
 is used to show timelines.
 
 Look in the examples directory for a program showing how to use the
-module and some sample data.
+module and some sample data. The first type of chart is the traditional
+sort you see in history books showing the lives of famous people against
+the timeline of world events.
+
+The second type lists events down the page, starting with the eariest.
+This will form a sort of diagonal. Used less for historical data and more
+for charting processes.
 
 INSTALLATION
 
@@ -55,3 +61,6 @@ V1.1:
 
 V1.2:
       - Minor fix to the POD
+
+V1.3:
+	  - New DiagonalGD chart type

@@ -1,5 +1,3 @@
-# $Id: Timeline.pm,v 1.24 2004/04/21 20:53:27 peterhickman Exp $
-
 package Graph::Timeline;
 
 use strict;
@@ -7,7 +5,7 @@ use warnings;
 
 use Date::Calc;
 
-our $VERSION = '1.2';
+our $VERSION = '1.3';
 
 sub new {
     my ($class) = @_;
@@ -74,14 +72,6 @@ sub window {
         die "Timeline->window() 'span' can only be defined with a 'start' and 'end'" unless $data{start} and $data{end};
     }
 
-    if ( $data{start_in} ) {
-        die "Timeline->window() 'start_in' can only be defined with a 'end'" unless $data{end};
-    }
-
-    if ( $data{end_in} ) {
-        die "Timeline->window() 'end_in' can only be defined with a 'start'" unless $data{start};
-    }
-
     if ( $data{callback} ) {
         die "Timeline->window() 'callback' can only be a CODE reference" unless ref( $data{callback} ) eq 'CODE';
     }
@@ -98,12 +88,12 @@ sub data {
 
     # Set the start and end, this make things easier
 
-    my $start = ( $self->{_window_start} ? $self->{_window_start} : '0000/00/00' );
-    my $end   = ( $self->{_window_end}   ? $self->{_window_end}   : '9999/99/99' );
+    my $start = ( $self->{_window_start} ? $self->{_window_start} : '0000/00/00T00:00:00' );
+    my $end   = ( $self->{_window_end}   ? $self->{_window_end}   : '9999/99/99T23:59:59' );
 
     my @results;
 
-	if ( $self->{_window_start} ) {
+    if ( $self->{_window_start} ) {
         my $x;
         $x->{start}       = $self->{_window_start};
         $x->{start_start} = $self->{_window_start};
@@ -185,6 +175,8 @@ sub _add_to_pool {
     %data = $self->_set_range( 'start', %data );
     %data = $self->_set_range( 'end',   %data );
 
+    $data{group} = '--unknown--' unless $data{group};
+
     foreach my $record ( @{ $self->{_pool} } ) {
         if ( $todo and $record->{start} gt $data{start} ) {
             push @newpool, \%data;
@@ -201,7 +193,7 @@ sub _add_to_pool {
 sub _valid_keys {
     my ( $self, $caller, $data, @keys ) = @_;
 
-    my @testkeys  = keys %{$data};
+    my @testkeys = keys %{$data};
     my %validkeys = map { $_ => $_ } @keys;
 
     foreach my $key (@testkeys) {
@@ -223,7 +215,10 @@ sub _valid_keys {
 sub _date_valid {
     my ( $self, $date ) = @_;
 
-    my ( $year, $month, $day ) = split( '\/', $date );
+    my ( $date_part, $time_part ) = split( 'T', $date );
+    my ( $year,  $month,   $day )     = split( '\/', $date_part );
+
+    ## Check the date first
 
     $month = '01' unless $month;
     $day   = '01' unless $day;
@@ -235,7 +230,19 @@ sub _date_valid {
     my $valid;
     eval { $valid = Date::Calc::check_date( $year, $month, $day ); };
 
-    return $valid;
+    return unless $valid;
+
+    ## Check the optional time part
+
+    if ($time_part) {
+		my ( $hours, $minutes, $seconds ) = split( ':',  $time_part );
+
+        return unless 0 <= $hours   and $hours <= 23;
+        return unless 0 <= $minutes and $minutes <= 59;
+        return unless 0 <= $seconds and $seconds <= 59;
+    }
+
+    return 1;
 }
 
 sub _required_keys {
@@ -266,11 +273,12 @@ sub _today {
 sub _set_range {
     my ( $self, $label, %record ) = @_;
 
-    my ( $year, $month, $day ) = split( '\/', $record{$label} );
+    my ( $date_part, $time_part ) = split( 'T', $record{$label} );
+    my ( $year,  $month,   $day )     = split( '\/', $date_part );
 
     if ($day) {
-        $record{"${label}_start"} = $record{$label};
-        $record{"${label}_end"}   = $record{$label};
+        $record{"${label}_start"} = $date_part;
+        $record{"${label}_end"}   = $date_part;
     }
     elsif ($month) {
         $record{"${label}_start"} = "$year/$month/01";
@@ -280,6 +288,15 @@ sub _set_range {
         $record{"${label}_start"} = "$year/01/01";
         $record{"${label}_end"}   = "$year/12/31";
     }
+
+	if($time_part) {
+    $record{"${label}_start"} .= "T" . $time_part;
+    $record{"${label}_end"}   .= "T" . $time_part;
+	}
+	else {
+    $record{"${label}_start"} .= "T00:00:00";
+    $record{"${label}_end"}   .= "T23:59:59";
+}
 
     return %record;
 }
@@ -292,7 +309,7 @@ Graph::Timeline - Render timeline data
 
 =head1 VERSION
 
-This document refers to verion 1.2 of Graph::Timeline, released July 15, 2005
+This document refers to verion 1.3 of Graph::Timeline, released June 17, 2007
 
 =head1 SYNOPSIS
 
@@ -462,14 +479,6 @@ The parameter is a hash describing an event
 =item Timeline->window() 'span' can only be defined with a 'start' and 'end'
 
 To define 'span' then you must also define 'start' and 'end'
-
-=item Timeline->window() 'start_in' can only be defined with a 'end'
-
-To define 'start_in' then you must also define 'end'
-
-=item Timeline->window() 'end_in' can only be defined with a 'start'
-
-To define 'end_in' then you must also define 'start'
 
 =item Timeline->window() 'callback' can only be a CODE reference
 

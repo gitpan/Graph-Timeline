@@ -1,5 +1,3 @@
-# $Id: GD.pm,v 1.19 2005/03/02 20:54:41 peterhickman Exp $
-
 package Graph::Timeline::GD;
 
 use strict;
@@ -10,7 +8,7 @@ use GD::Text::Wrap;
 
 use base 'Graph::Timeline';
 
-our $VERSION = '1.2';
+our $VERSION = '1.3';
 
 sub render {
     die "Timeline::GD->render() expected HASH as parameter" unless scalar(@_) % 2 == 1;
@@ -29,17 +27,17 @@ sub render {
     $counter++ if $data{pixelsperyear};
 
     if ( $counter == 0 ) {
-        die "Timeline::GD->render() one of 'pixelsperlday', 'pixelsperlmonth' or 'pixelsperyear' must be defined";
+        die "Timeline::GD->render() one of 'pixelsperday', 'pixelspermonth' or 'pixelsperyear' must be defined";
     }
     elsif ( $counter > 1 ) {
-        die "Timeline::GD->render() only one of 'pixelsperlday', 'pixelsperlmonth' or 'pixelsperyear' can be defined";
+        die "Timeline::GD->render() only one of 'pixelsperday', 'pixelspermonth' or 'pixelsperyear' can be defined";
     }
 
     # Get the data to render
 
     my @pool = $self->data();
 
-	die "Timeline::GD->render() there is no data to render" unless @pool;
+    die "Timeline::GD->render() there is no data to render" if scalar(@pool) == 2;
 
     my ( $start, $end ) = $self->_get_start_and_end(@pool);
 
@@ -49,7 +47,7 @@ sub render {
     my $image_width = 0;
 
     foreach my $year ( $start .. $end ) {
-		$years{$year}->{year} = $year;
+        $years{$year}->{year} = $year;
         $years{$year}->{days_in_year} = Date::Calc::Days_in_Year( $year, 12 );
         if ( $data{pixelsperday} ) {
             $years{$year}->{pixels_in_year} = $years{$year}->{days_in_year} * $data{pixelsperday};
@@ -57,7 +55,7 @@ sub render {
         elsif ( $data{pixelspermonth} ) {
             $years{$year}->{pixels_in_year} = 12 * $data{pixelspermonth};
         }
-        elsif ( $data{pixelsperyear} ) {
+        else {
             $years{$year}->{pixels_in_year} = $data{pixelsperyear};
         }
 
@@ -69,7 +67,7 @@ sub render {
     # Now we should build up the streams for the points and intervals
 
     my %intervals;
-	my $sequence = 1;
+    my $sequence = 1;
 
     foreach my $record (@pool) {
         if ( $record->{type} eq 'interval' ) {
@@ -80,23 +78,23 @@ sub render {
             $record->{width}      = $self->_calculate_width( $record, 'start_start', 'end_end',   %years );
             $record->{width_pre}  = $self->_calculate_width( $record, 'start_start', 'start_end', %years );
             $record->{width_post} = $self->_calculate_width( $record, 'end_start',   'end_end',   %years );
-            $self->render_interval( $record );
+            $self->render_interval($record);
 
             foreach my $stream ( @{ $intervals{$group} } ) {
                 if ( $stream->[-1]->{end_end} lt $record->{start_start} ) {
-                    push ( @{$stream}, $record );
+                    push( @{$stream}, $record );
                     $done = 1;
                     last;
                 }
             }
 
-            push ( @{ $intervals{$group} }, [$record] ) unless $done;
+            push( @{ $intervals{$group} }, [$record] ) unless $done;
         }
-		elsif( $record->{type} eq 'point' ) {
-			$record->{sequence} = $sequence++;
-			$self->render_point( $record );
-			push( @{ $intervals{'--points--'}[0]}, $record );
-		}
+        else {
+            $record->{sequence} = $sequence++;
+            $self->render_point($record);
+            push( @{ $intervals{'--points--'}[0] }, $record );
+        }
     }
 
     # Work out the full height of the image
@@ -107,7 +105,7 @@ sub render {
 
     my $max = 0;
     foreach my $year ( $start .. $end ) {
-		die "Timeline::GD->render() key 'height' is not defined from render_year()" unless $years{$year}->{height};
+        die "Timeline::GD->render() key 'height' is not defined from render_year()" unless $years{$year}->{height};
         $max = $years{$year}->{height} if $years{$year}->{height} > $max;
     }
     $image_height += $max;
@@ -118,7 +116,7 @@ sub render {
         foreach my $stream ( @{ $intervals{$group} } ) {
             $max = 0;
             foreach my $entry ( @{$stream} ) {
-				die "Timeline::GD->render() key 'height' is not defined from render_" . $entry->{type} . "()" unless $entry->{height};
+                die "Timeline::GD->render() key 'height' is not defined from render_" . $entry->{type} . "()" unless $entry->{height};
                 $max = $entry->{height} if $entry->{height} > $max;
             }
             $image_height += $max;
@@ -134,15 +132,15 @@ sub render {
 
     my $xpointer = $data{border};
 
-	$max = 0;
+    $max = 0;
 
-	foreach my $entry ( @{ $intervals{'--points--'}[0]} ) {
-		$max = $entry->{height};
+    foreach my $entry ( @{ $intervals{'--points--'}[0] } ) {
+        $max = $entry->{height};
         $xpointer = $data{border} + $self->_calc_start_x( $start, $entry->{start}, %years );
         $im->copy( $entry->{data}, $xpointer, $ypointer, 0, 0, $entry->{width}, $entry->{height} );
-   	}
+    }
 
-	$ypointer += $max;
+    $ypointer += $max;
 
     # Render the big image, years next
 
@@ -157,17 +155,17 @@ sub render {
 
     # Render the big image, intervals last
 
-	foreach my $group ( sort keys %intervals ) {
-		if( $group ne '--points--' ) {
-	        foreach my $stream ( @{ $intervals{$group} } ) {
-    	        $max = 0;
-        	    foreach my $entry ( @{$stream} ) {
-            	    $max = $entry->{height} if $entry->{height} > $max;
-                	$xpointer = $data{border} + $self->_calc_start_x( $start, $entry->{start_start}, %years );
-            	    $im->copy( $entry->{data}, $xpointer, $ypointer, 0, 0, $entry->{width}, $entry->{height} );
-            	}
-            	$ypointer += $max;
-			}
+    foreach my $group ( sort keys %intervals ) {
+        if ( $group ne '--points--' ) {
+            foreach my $stream ( @{ $intervals{$group} } ) {
+                $max = 0;
+                foreach my $entry ( @{$stream} ) {
+                    $max = $entry->{height} if $entry->{height} > $max;
+                    $xpointer = $data{border} + $self->_calc_start_x( $start, $entry->{start_start}, %years );
+                    $im->copy( $entry->{data}, $xpointer, $ypointer, 0, 0, $entry->{width}, $entry->{height} );
+                }
+                $ypointer += $max;
+            }
         }
     }
 
@@ -256,37 +254,38 @@ sub render_point {
     # height and width of a point
 
     my $height = 30;
-	my $width  = 100;
+    my $width  = 100;
 
     my $im = GD::Image->new( $width, $height );
     my $base = $im->colorAllocate( 255, 255, 255 );
-    my $ink  = $im->colorAllocate(   0,   0,   0 );
+    my $ink  = $im->colorAllocate( 0,   0,   0 );
 
-	$im->transparent( $base );
+    $im->transparent($base);
 
     my $wrapbox = GD::Text::Wrap->new(
         $im,
-		width      => ($width - 2),
-		height     => ($height / 2),
+        width      => ( $width - 2 ),
+        height     => ( $height / 2 ),
         line_space => 4,
         color      => $ink,
         text       => $record->{label},
         align      => 'left',
     );
 
-	$wrapbox->set_font(gdSmallFont);
+    $wrapbox->set_font(gdSmallFont);
 
-	if( $record->{sequence} % 2 == 1) {
-    	$wrapbox->draw( 2, 0 );
-		$im->line( 0, 0, 0, $height, $ink );
-	} else {
-		$wrapbox->draw( 2, ($height / 2) );
-		$im->line( 0, ($height / 2), 0, $height, $ink );
-	}
+    if ( $record->{sequence} % 2 == 1 ) {
+        $wrapbox->draw( 2, 0 );
+        $im->line( 0, 0, 0, $height, $ink );
+    }
+    else {
+        $wrapbox->draw( 2, ( $height / 2 ) );
+        $im->line( 0, ( $height / 2 ), 0, $height, $ink );
+    }
 
     $record->{data}   = $im;
     $record->{height} = $height;
-    $record->{width} = $width;
+    $record->{width}  = $width;
 }
 
 sub _calculate_width {
@@ -294,8 +293,8 @@ sub _calculate_width {
 
     return 0 if $record->{$start} eq $record->{$end};
 
-    my ( $first_year, $first_month, $first_day ) = split ( '\/', $record->{$start} );
-    my ( $last_year,  $last_month,  $last_day )  = split ( '\/', $record->{$end} );
+    my ( $first_year, $first_month, $first_day ) = split( '\/', ( split( 'T', $record->{$start} ) )[0] );
+    my ( $last_year,  $last_month,  $last_day )  = split( '\/', ( split( 'T', $record->{$end} ) )[0] );
 
     # Calculate pixel width
 
@@ -324,8 +323,8 @@ sub _calculate_width {
 sub _calc_start_x {
     my ( $self, $start_graph, $start_interval, %years ) = @_;
 
-    my ( $first_year, $first_month, $first_day ) = split ( '\/', $start_graph );
-    my ( $last_year,  $last_month,  $last_day )  = split ( '\/', $start_interval );
+    my ( $first_year, $first_month, $first_day ) = split( '\/', ( split( 'T', $start_graph ) )[0] );
+    my ( $last_year,  $last_month,  $last_day )  = split( '\/', ( split( 'T', $start_interval ) )[0] );
 
     my $x = 0;
 
@@ -351,8 +350,8 @@ sub _get_start_and_end {
         $end = $record->{end} if $record->{end} gt $end;
     }
 
-    $start = ( split ( '\/', $start ) )[0];
-    $end   = ( split ( '\/', $end ) )[0];
+    $start = ( split( '\/', $start ) )[0];
+    $end   = ( split( '\/', $end ) )[0];
 
     return $start, $end;
 }
@@ -365,7 +364,7 @@ Graph::Timeline::GD - Render timeline data with GD
 
 =head1 VERSION
 
-This document refers to verion 1.2 of Graph::Timeline::GD, released July 15, 2005
+This document refers to verion 1.3 of Graph::Timeline::GD, released June 17, 2007
 
 =head1 SYNOPSIS
 
@@ -561,11 +560,11 @@ some arguments were supplied.
 
 Render expects a hash and did not get one
 
-=item Timeline::GD->render() one of 'pixelsperlday', 'pixelsperlmonth' or 'pixelsperyear' must be defined
+=item Timeline::GD->render() one of 'pixelsperday', 'pixelspermonth' or 'pixelsperyear' must be defined
 
 One of the required parameters needs to be defined
 
-=item Timeline::GD->render() only one of 'pixelsperlday', 'pixelsperlmonth' or 'pixelsperyear' can be defined
+=item Timeline::GD->render() only one of 'pixelsperday', 'pixelspermonth' or 'pixelsperyear' can be defined
 
 Only on parameter can be defined
 

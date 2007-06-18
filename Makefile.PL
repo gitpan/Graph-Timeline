@@ -9,5 +9,6 @@ WriteMakefile(
 						'Date::Calc' => 0, 
    						'GD' => 0,
 						'GD::Text' => 0,
+						'GD::Text::Wrap' => 0,
 					},
 );
