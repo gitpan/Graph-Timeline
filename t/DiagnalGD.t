@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 10;
 
 use_ok('Graph::Timeline::DiagonalGD');
 
@@ -39,5 +39,15 @@ like( $@, qr/^Timeline::DiagonalGD->render\(\) Date range spans into months or y
 
 eval { $x->render( unknown => 42, 'graph-width' => 1, 'label-width' => 1 ); };
 like( $@, qr/^Timeline->render\(\) invalid key 'unknown' passed as data/, 'Unknown parameter' );
+
+################################################################################
+# Map parameters
+################################################################################
+
+eval { $x->map( 'wrong', 'whatever' ); };
+like( $@, qr/^Timeline::DiagonalGD->map\(\) Unknown map style, use 'line' or 'box'/, 'Wrong argument' );
+
+eval { $x->map( 'line' ); };
+like( $@, qr/^Timeline::DiagonalGD->map\(\) The map requires a name/, 'Wrong argument' );
 
 # vim: syntax=perl :

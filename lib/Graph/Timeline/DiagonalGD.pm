@@ -8,7 +8,7 @@ use GD::Text::Wrap;
 
 use base 'Graph::Timeline';
 
-our $VERSION = '1.3';
+our $VERSION = '1.4';
 
 sub render {
     die "Timeline::DiagonalGD->render() expected HASH as parameter" unless scalar(@_) % 2 == 1;
@@ -62,9 +62,9 @@ sub render {
         $end_label = $x->{end_end} if $end_label lt $x->{end_end};
     }
 
-	##
-	## Setting up the title for the page
-	##
+    ##
+    ## Setting up the title for the page
+    ##
 
     my $wrapbox = GD::Text::Wrap->new(
         $image,
@@ -83,7 +83,7 @@ sub render {
         width  => $data{'graph-width'},
         height => 20,
         color  => $black,
-        text   => (split('T',$start_label))[1],
+        text   => ( split( 'T', $start_label ) )[1],
         align  => 'left',
     );
 
@@ -95,7 +95,7 @@ sub render {
         width  => $data{'graph-width'},
         height => 20,
         color  => $black,
-        text   => (split('T',$end_label))[1],
+        text   => ( split( 'T', $end_label ) )[1],
         align  => 'right',
     );
 
@@ -105,29 +105,45 @@ sub render {
     my $pos    = $data{border} + 40;
     my $offset = $data{border} + $data{'label-width'};
 
-	my %colours;
+    my %colours;
+
+    ##
+    ## Rather than calculate this twice lets store the values as we go along
+    ##
+
+    my @map_line;
+    my @map_box;
 
     foreach my $x (@pool) {
-		next if $x->{type} eq 'marker';
+        next if $x->{type} eq 'marker';
 
         my $element_start = int( ( $x->{graph_start} / $end_graph ) * $data{'graph-width'} ) + $offset;
         my $element_end   = int( ( $x->{graph_end} / $end_graph ) * $data{'graph-width'} ) + $offset;
 
         $element_end = $element_start + 1 if $element_end <= $element_start;
 
-		##
-		## Select the colour to use
-		##
+        ##
+        ## Set up the map elements
+        ##
 
-		unless(defined($colours{$x->{label}})) {
-			if(defined($data{colours}{$x->{label}})) {
-				$colours{$x->{label}} = $image->colorAllocate( @{$data{colours}{$x->{label}}} );
-			}
-			else {
-				$colours{$x->{label}} = $black;
-			}
-		}
-		my $colour = $colours{$x->{label}};
+        if ( $x->{url} ) {
+            push @map_line, $self->_map_line( $x->{url}, $data{border}, $pos, ( $image_width - $data{border} ), $pos + 19 );
+            push @map_box, $self->_map_box( $x->{url}, $element_start, $pos, $element_end, $pos + 19, $image_width );
+        }
+
+        ##
+        ## Select the colour to use
+        ##
+
+        unless ( defined( $colours{ $x->{label} } ) ) {
+            if ( defined( $data{colours}{ $x->{label} } ) ) {
+                $colours{ $x->{label} } = $image->colorAllocate( @{ $data{colours}{ $x->{label} } } );
+            }
+            else {
+                $colours{ $x->{label} } = $black;
+            }
+        }
+        my $colour = $colours{ $x->{label} };
 
         ##
         ## Draw the line
@@ -161,7 +177,57 @@ sub render {
         $pos += 20;
     }
 
+    ##
+    ## Store the maps for the later call
+    ##
+
+    $self->{map_line} = [@map_line];
+    $self->{map_box}  = [@map_box];
+
     return $image->png;
+}
+
+sub map {
+    my ( $self, $style, $name ) = @_;
+
+    die "Timeline::DiagonalGD->map() The map requires a name" unless $name;
+
+    my $text = "<map name=\"$name\">\n";
+
+    if ( $style eq 'line' ) {
+        foreach my $line ( @{ $self->{map_line} } ) {
+            $text .= "    $line\n";
+        }
+    }
+    elsif ( $style eq 'box' ) {
+        foreach my $line ( @{ $self->{map_box} } ) {
+            $text .= "    $line\n";
+        }
+    }
+    else {
+        die "Timeline::DiagonalGD->map() Unknown map style, use 'line' or 'box'";
+    }
+
+    $text .= "</map>\n";
+
+    return $text;
+}
+
+sub _map_line {
+    my ( $self, $url, $x1, $y1, $x2, $y2 ) = @_;
+
+    return " <area shape=\"rect\" coords=\"$x1,$y1,$x2,$y2\" href=\"$url\" />";
+}
+
+sub _map_box {
+    my ( $self, $url, $x1, $y1, $x2, $y2, $max_width ) = @_;
+
+    my $new_x1 = $x1 - 5;
+    my $new_x2 = $x2 + 5;
+
+    $new_x2 = $max_width if $new_x2 > $max_width;
+
+    return $self->_map_line( $url, $new_x1, $y1, $new_x2, $y2 );
 }
 
 sub _title_line {
@@ -208,7 +274,7 @@ Graph::Timeline::DiagonalGD - Render timeline data with GD
 
 =head1 VERSION
 
-This document refers to verion 1.3 of Graph::Timeline::DiagonalGD, released June 17, 2007
+This document refers to verion 1.4 of Graph::Timeline::DiagonalGD, released June 20, 2007
 
 =head1 SYNOPSIS
 
@@ -220,6 +286,8 @@ to the length of the event. You get something like this:
  second event     :  XXXXX
  third event      :    XX
  fourth event:    :     XXXXXX
+
+Optionally a client side imagemap can be generated for the events that have a url defined.
 
 An example of usage follows. Note that the labels down the left hand side are based on the
 id attribute and the colour of the event box on the label.
@@ -239,8 +307,8 @@ id attribute and the colour of the event box on the label.
       next if $line =~ m/^\s*$/;
       next if $line =~ m/^\s*#/;
  
-      my ( $id, $label, $start, $end ) = split( ',', $line );
-      $x->add_interval( label => $label, start => $start, end => $end, id => $id );
+      my ( $id, $label, $start, $end, $url ) = split( ',', $line );
+      $x->add_interval( label => $label, start => $start, end => $end, id => $id, url => $url );
  }
 
  my %render = (
@@ -256,6 +324,10 @@ id attribute and the colour of the event box on the label.
  open( FILE, '>test_diagonal1.png' );
  binmode(FILE);
  print FILE $x->render(%render);
+ close(FILE);
+
+ open( FILE, '>test_diagonal1.map' );
+ print FILE $x->map( 'box', 'image1' );
  close(FILE);
 
 =head1 DESCRIPTION
@@ -315,6 +387,24 @@ in black.
 
 =back
 
+=item map( style, name )
+
+Produce a client side imagemap for the data that has a url defined. 
+
+=over 4
+
+=item style
+
+There are two styles available. 'line' or 'box'. For line the clickable area is the whole line
+that the event occurs on. For box the clickable area is the box drawn for the event plus 5 pixels 
+to the left and right.
+
+=item name
+
+This is the name that will be used for the imagemap
+
+=back
+
 =back
 
 =head2 Private methods
@@ -361,6 +451,14 @@ None of the input data got passed through the call to window()
 
 It is assumed that the data will span, at best, a few days. More than that and we can't 
 realy draw this graph.
+
+=item Timeline::DiagonalGD->map() Unknown map style, use 'line' or 'box'
+
+Maps come in type styles, 'line' or 'box'. You tried to use something else
+
+=item Timeline::DiagonalGD->map() The map requires a name
+
+You must supply a name for the map
 
 =back
 

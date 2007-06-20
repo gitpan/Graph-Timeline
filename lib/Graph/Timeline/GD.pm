@@ -8,7 +8,7 @@ use GD::Text::Wrap;
 
 use base 'Graph::Timeline';
 
-our $VERSION = '1.3';
+our $VERSION = '1.4';
 
 sub render {
     die "Timeline::GD->render() expected HASH as parameter" unless scalar(@_) % 2 == 1;
@@ -364,7 +364,7 @@ Graph::Timeline::GD - Render timeline data with GD
 
 =head1 VERSION
 
-This document refers to verion 1.3 of Graph::Timeline::GD, released June 17, 2007
+This document refers to verion 1.4 of Graph::Timeline::GD, released June 20, 2007
 
 =head1 SYNOPSIS
 

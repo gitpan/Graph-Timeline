@@ -5,7 +5,7 @@ use warnings;
 
 use Date::Calc;
 
-our $VERSION = '1.3';
+our $VERSION = '1.4';
 
 sub new {
     my ($class) = @_;
@@ -26,7 +26,7 @@ sub add_interval {
 
     %data = $self->_lowercase_keys(%data);
     $self->_required_keys( 'add_interval', \%data, (qw/start end label/) );
-    $self->_valid_keys( 'add_interval', \%data, (qw/start end label group id/) );
+    $self->_valid_keys( 'add_interval', \%data, (qw/start end label group id url/) );
 
     $data{type} = 'interval';
 
@@ -309,7 +309,7 @@ Graph::Timeline - Render timeline data
 
 =head1 VERSION
 
-This document refers to verion 1.3 of Graph::Timeline, released June 17, 2007
+This document refers to verion 1.4 of Graph::Timeline, released June 20, 2007
 
 =head1 SYNOPSIS
 
