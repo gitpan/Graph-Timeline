@@ -8,7 +8,7 @@ use GD::Text::Wrap;
 
 use base 'Graph::Timeline';
 
-our $VERSION = '1.4';
+our $VERSION = '1.5';
 
 sub render {
     die "Timeline::DiagonalGD->render() expected HASH as parameter" unless scalar(@_) % 2 == 1;
@@ -250,9 +250,9 @@ sub _calc_seconds {
     my ( $date_date, $date_time ) = split( 'T', $date );
     my ( $base_date, $base_time ) = split( 'T', $base );
 
-    my ( $dyear, $dmonth,  $dday )    = split( '\/', $date_date );
+    my ( $dyear, $dmonth,  $dday )    = split( '[\/-]', $date_date );
     my ( $dhour, $dminute, $dsecond ) = split( ':',  $date_time );
-    my ( $byear, $bmonth,  $bday )    = split( '\/', $base_date );
+    my ( $byear, $bmonth,  $bday )    = split( '[\/-]', $base_date );
     my ( $bhour, $bminute, $bsecond ) = split( ':',  $base_time );
 
     my ( $D_y, $D_m, $D_d, $Dh, $Dm, $Ds ) = Date::Calc::Delta_YMDHMS( $byear, $bmonth, $bday, $bhour, $bminute, $bsecond, $dyear, $dmonth, $dday, $dhour, $dminute, $dsecond );
@@ -274,7 +274,7 @@ Graph::Timeline::DiagonalGD - Render timeline data with GD
 
 =head1 VERSION
 
-This document refers to verion 1.4 of Graph::Timeline::DiagonalGD, released June 20, 2007
+This document refers to verion 1.5 of Graph::Timeline::DiagonalGD, September 29, 2009
 
 =head1 SYNOPSIS
 

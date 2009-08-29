@@ -8,7 +8,7 @@ use GD::Text::Wrap;
 
 use base 'Graph::Timeline';
 
-our $VERSION = '1.4';
+our $VERSION = '1.5';
 
 sub render {
     die "Timeline::GD->render() expected HASH as parameter" unless scalar(@_) % 2 == 1;
@@ -293,8 +293,8 @@ sub _calculate_width {
 
     return 0 if $record->{$start} eq $record->{$end};
 
-    my ( $first_year, $first_month, $first_day ) = split( '\/', ( split( 'T', $record->{$start} ) )[0] );
-    my ( $last_year,  $last_month,  $last_day )  = split( '\/', ( split( 'T', $record->{$end} ) )[0] );
+    my ( $first_year, $first_month, $first_day ) = split( '[\/-]', ( split( 'T', $record->{$start} ) )[0] );
+    my ( $last_year,  $last_month,  $last_day )  = split( '[\/-]', ( split( 'T', $record->{$end} ) )[0] );
 
     # Calculate pixel width
 
@@ -323,8 +323,8 @@ sub _calculate_width {
 sub _calc_start_x {
     my ( $self, $start_graph, $start_interval, %years ) = @_;
 
-    my ( $first_year, $first_month, $first_day ) = split( '\/', ( split( 'T', $start_graph ) )[0] );
-    my ( $last_year,  $last_month,  $last_day )  = split( '\/', ( split( 'T', $start_interval ) )[0] );
+    my ( $first_year, $first_month, $first_day ) = split( '[\/-]', ( split( 'T', $start_graph ) )[0] );
+    my ( $last_year,  $last_month,  $last_day )  = split( '[\/-]', ( split( 'T', $start_interval ) )[0] );
 
     my $x = 0;
 
@@ -350,8 +350,8 @@ sub _get_start_and_end {
         $end = $record->{end} if $record->{end} gt $end;
     }
 
-    $start = ( split( '\/', $start ) )[0];
-    $end   = ( split( '\/', $end ) )[0];
+    $start = ( split( '[\/-]', $start ) )[0];
+    $end   = ( split( '[\/-]', $end ) )[0];
 
     return $start, $end;
 }
@@ -364,7 +364,7 @@ Graph::Timeline::GD - Render timeline data with GD
 
 =head1 VERSION
 
-This document refers to verion 1.4 of Graph::Timeline::GD, released June 20, 2007
+This document refers to verion 1.5 of Graph::Timeline::GD, September 29, 2009
 
 =head1 SYNOPSIS
 

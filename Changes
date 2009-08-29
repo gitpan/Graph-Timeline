@@ -1,5 +1,8 @@
 Revision history for Perl extension Graph::Timeline
 
+1.5  Sat 29th September 2009
+    - Allow - as a date seperator as requested by Duncan Ferguson
+
 1.4  Wed 20th June 2007
     - New map method for DiagonalGD allow the user to create an
       imagemap.

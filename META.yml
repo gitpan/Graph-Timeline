@@ -1,9 +1,10 @@
 --- #YAML:1.0
 name:                Graph-Timeline
-version:             1.4
+version:             1.5
 abstract:            ~
 license:             ~
-generated_by:        ExtUtils::MakeMaker version 6.32
+author:              ~
+generated_by:        ExtUtils::MakeMaker version 6.44
 distribution_type:   module
 requires:     
     Date::Calc:                    0
@@ -11,5 +12,5 @@ requires:
     GD::Text:                      0
     GD::Text::Wrap:                0
 meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
-    version: 1.2
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3

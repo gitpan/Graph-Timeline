@@ -1,6 +1,6 @@
 Graph::Timeline - Manipulate and display timelines
 
-This is release V1.4 of Graph::Timeline. The class 
+This is release V1.5 of Graph::Timeline. The class 
 is used to show timelines.
 
 Look in the examples directory for a program showing how to use the
@@ -66,3 +66,10 @@ V1.2:
 
 V1.3:
 	  - New DiagonalGD chart type
+
+V1.4:
+      - New map method for DiagonalGD allow the user to create an
+      imagemap.
+
+V1.5:
+      - Now allowing - as a date seperator

@@ -5,7 +5,7 @@ use warnings;
 
 use Date::Calc;
 
-our $VERSION = '1.4';
+our $VERSION = '1.5';
 
 sub new {
     my ($class) = @_;
@@ -216,7 +216,7 @@ sub _date_valid {
     my ( $self, $date ) = @_;
 
     my ( $date_part, $time_part ) = split( 'T', $date );
-    my ( $year,  $month,   $day )     = split( '\/', $date_part );
+    my ( $year,  $month,   $day )     = split( '[\/-]', $date_part );
 
     ## Check the date first
 
@@ -274,7 +274,7 @@ sub _set_range {
     my ( $self, $label, %record ) = @_;
 
     my ( $date_part, $time_part ) = split( 'T', $record{$label} );
-    my ( $year,  $month,   $day )     = split( '\/', $date_part );
+    my ( $year,  $month,   $day )     = split( '[\/-]', $date_part );
 
     if ($day) {
         $record{"${label}_start"} = $date_part;
@@ -309,7 +309,7 @@ Graph::Timeline - Render timeline data
 
 =head1 VERSION
 
-This document refers to verion 1.4 of Graph::Timeline, released June 20, 2007
+This document refers to verion 1.5 of Graph::Timeline, released September 29, 2009
 
 =head1 SYNOPSIS
 
